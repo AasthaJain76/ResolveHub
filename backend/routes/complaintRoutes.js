@@ -1,0 +1,43 @@
+const express = require('express');
+const router = express.Router();
+const {
+    createComplaint,
+    getComplaints,
+    getComplaintById,
+    updateComplaint,
+    getComplaintStats,
+    addComment,
+    editComment,
+    deleteComment,
+    upvoteComplaint,
+    deleteComplaint,
+    submitFeedback,
+    reopenComplaint,
+} = require('../controllers/complaintController');
+const { protect, authorize } = require('../middleware/auth');
+const upload = require('../middleware/uploadMiddleware');
+
+// All routes are protected
+router.use(protect);
+
+router.route('/')
+    .get(getComplaints)
+    .post(upload.array('images', 5), createComplaint);
+
+router.get('/stats', getComplaintStats);
+
+router.route('/:id/comments/:commentId')
+    .put(editComment)
+    .delete(deleteComment);
+
+router.post('/:id/comments', addComment);
+router.post('/:id/upvote', upvoteComplaint);
+router.post('/:id/feedback', submitFeedback);
+router.post('/:id/reopen', reopenComplaint);
+
+router.route('/:id')
+    .get(getComplaintById)
+    .put(upload.fields([{ name: 'images', maxCount: 5 }, { name: 'resolvedImages', maxCount: 5 }]), updateComplaint)
+    .delete(deleteComplaint);
+
+module.exports = router;
