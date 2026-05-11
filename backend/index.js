@@ -8,7 +8,7 @@ dotenv.config();
 const startServer = async () => {
     try {
         await connectDB();
-        
+
         // Start escalation cron job
         const startEscalationCronJob = require('./utils/escalationCron');
         startEscalationCronJob();
@@ -48,6 +48,9 @@ const startServer = async () => {
         app.use('/api/notifications', notificationRoutes);
         console.log('Notification routes mounted');
 
+        app.get("/", (req, res) => {
+            res.send("ResolveHub Backend Running");
+        });
         // Test route to verify mounting works
         app.get('/api/test', (req, res) => {
             console.log('Test route hit');
@@ -63,7 +66,7 @@ const startServer = async () => {
         });
 
         const PORT = process.env.PORT || 5000;
-        
+
         app.listen(PORT, '0.0.0.0', () => {
             console.log(`Server running on port ${PORT}`);
         });
