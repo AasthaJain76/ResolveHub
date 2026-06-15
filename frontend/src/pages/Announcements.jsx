@@ -140,15 +140,22 @@ export default function Announcements() {
 
                                 <div className="announcement-footer">
                                     <span className="announcement-author">Posted by {a.createdBy?.name || 'Warden'}</span>
-                                    {user.role === 'warden' && (
-                                        <button 
-                                            className="btn-icon delete-btn" 
-                                            onClick={() => handleDelete(a._id)}
-                                            title="Delete Post"
-                                        >
-                                            <Trash2 size={18} />
-                                        </button>
-                                    )}
+                                    {(() => {
+                                        const getUserId = (u) => u && (typeof u === 'object' ? (u._id || u.id) : u);
+                                        const currentUserId = getUserId(user);
+                                        const creatorId = getUserId(a.createdBy);
+                                        const isCreator = currentUserId && creatorId && currentUserId === creatorId;
+                                        
+                                        return user.role === 'warden' && isCreator && (
+                                            <button 
+                                                className="btn-icon delete-btn" 
+                                                onClick={() => handleDelete(a._id)}
+                                                title="Delete Post"
+                                            >
+                                                <Trash2 size={18} />
+                                            </button>
+                                        );
+                                    })()}
                                 </div>
                             </motion.div>
                         ))}

@@ -323,23 +323,34 @@ export default function ComplaintDetail() {
                                     </span>
                                 </div>
                                 <div className="detail-actions">
-                                    {(user._id === complaint.createdBy?._id || user.id === complaint.createdBy?.id) && complaint.status === 'Pending' && (
-                                        <button
-                                            className="btn btn-secondary btn-sm"
-                                            onClick={() => navigate(`/complaints/${id}/edit`)}
-                                        >
-                                            Edit
-                                        </button>
-                                    )}
-                                    {(user.role === 'warden' || (user._id === complaint.createdBy?._id && complaint.status === 'Pending')) && (
-                                        <button
-                                            className="btn btn-danger btn-sm"
-                                            onClick={handleDelete}
-                                            disabled={loading}
-                                        >
-                                            Delete
-                                        </button>
-                                    )}
+                                    {(() => {
+                                        const getUserId = (u) => u && (typeof u === 'object' ? (u._id || u.id) : u);
+                                        const currentUserId = getUserId(user);
+                                        const creatorId = getUserId(complaint.createdBy);
+                                        const isCreator = currentUserId && creatorId && currentUserId === creatorId;
+                                        
+                                        return (
+                                            <>
+                                                {isCreator && complaint.status === 'Pending' && (
+                                                    <button
+                                                        className="btn btn-secondary btn-sm"
+                                                        onClick={() => navigate(`/complaints/${id}/edit`)}
+                                                    >
+                                                        Edit
+                                                    </button>
+                                                )}
+                                                {isCreator && complaint.status === 'Pending' && (
+                                                    <button
+                                                        className="btn btn-danger btn-sm"
+                                                        onClick={handleDelete}
+                                                        disabled={loading}
+                                                    >
+                                                        Delete
+                                                    </button>
+                                                )}
+                                            </>
+                                        );
+                                    })()}
                                 </div>
                             </div>
                             <h1 className="detail-title">{complaint.title}</h1>
@@ -504,27 +515,34 @@ export default function ComplaintDetail() {
                                                         )}
                                                         <span className="detail-comment-time">{formatDate(c.createdAt)}</span>
                                                         {/* Edit/Delete buttons for comment creator */}
-                                                        {(user?._id === c.user?._id || user?.id === c.user?.id || user?._id === c.user || user?.id === c.user) && (
-                                                            <div className="comment-actions">
-                                                                <button
-                                                                    type="button"
-                                                                    className="comment-action-btn btn-ghost"
-                                                                    onClick={() => {
-                                                                        setEditingCommentId(c.id);
-                                                                        setEditCommentText(c.text);
-                                                                    }}
-                                                                >
-                                                                    Edit
-                                                                </button>
-                                                                <button
-                                                                    type="button"
-                                                                    className="comment-action-btn btn-ghost"
-                                                                    onClick={() => handleDeleteComment(c.id)}
-                                                                >
-                                                                    Delete
-                                                                </button>
-                                                            </div>
-                                                        )}
+                                                        {(() => {
+                                                            const getUserId = (u) => u && (typeof u === 'object' ? (u._id || u.id) : u);
+                                                            const currentUserId = getUserId(user);
+                                                            const commentUserId = getUserId(c.user);
+                                                            const isCommentCreator = currentUserId && commentUserId && currentUserId === commentUserId;
+                                                            
+                                                            return isCommentCreator && (
+                                                                <div className="comment-actions">
+                                                                    <button
+                                                                        type="button"
+                                                                        className="comment-action-btn btn-ghost"
+                                                                        onClick={() => {
+                                                                            setEditingCommentId(c.id);
+                                                                            setEditCommentText(c.text);
+                                                                        }}
+                                                                    >
+                                                                        Edit
+                                                                    </button>
+                                                                    <button
+                                                                        type="button"
+                                                                        className="comment-action-btn btn-ghost"
+                                                                        onClick={() => handleDeleteComment(c.id)}
+                                                                    >
+                                                                        Delete
+                                                                    </button>
+                                                                </div>
+                                                            );
+                                                        })()}
                                                     </div>
                                                     {editingCommentId === c.id ? (
                                                         <form className="edit-comment-form" onSubmit={e => handleEditComment(e, c.id)}>

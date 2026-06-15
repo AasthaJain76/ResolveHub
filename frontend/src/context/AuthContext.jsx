@@ -10,10 +10,21 @@ export function AuthProvider({ children }) {
 
     useEffect(() => {
         if (token) {
+            console.log('[AuthContext] Token found in localStorage. Loading user profile...');
             loadUser();
         } else {
+            console.log('[AuthContext] No token found in localStorage.');
             setLoading(false);
         }
+
+        const handleLogout = () => {
+            console.warn('[AuthContext] Received auth-logout event. Logging out user.');
+            logout();
+        };
+        window.addEventListener('auth-logout', handleLogout);
+        return () => {
+            window.removeEventListener('auth-logout', handleLogout);
+        };
     }, []);
 
     const loadUser = async () => {
@@ -29,23 +40,31 @@ export function AuthProvider({ children }) {
     };
 
     const login = async (email, password) => {
-        const { user: userData, token: authToken } = await authService.login(email, password);
-        localStorage.setItem('hr_token', authToken);
-        setToken(authToken);
+        console.log('[AuthContext] login function triggered');
+        const { user: userData, accessToken, refreshToken } = await authService.login(email, password);
+        console.log('[AuthContext] login success. Saving tokens.');
+        localStorage.setItem('hr_token', accessToken);
+        localStorage.setItem('hr_refresh_token', refreshToken);
+        setToken(accessToken);
         setUser(userData);
         return userData;
     };
 
     const register = async (userData) => {
-        const { user: newUser, token: authToken } = await authService.register(userData);
-        localStorage.setItem('hr_token', authToken);
-        setToken(authToken);
+        console.log('[AuthContext] register function triggered');
+        const { user: newUser, accessToken, refreshToken } = await authService.register(userData);
+        console.log('[AuthContext] register success. Saving tokens.');
+        localStorage.setItem('hr_token', accessToken);
+        localStorage.setItem('hr_refresh_token', refreshToken);
+        setToken(accessToken);
         setUser(newUser);
         return newUser;
     };
 
     const logout = () => {
+        console.log('[AuthContext] logging out. Clearing tokens.');
         localStorage.removeItem('hr_token');
+        localStorage.removeItem('hr_refresh_token');
         setToken(null);
         setUser(null);
     };
